@@ -1,0 +1,145 @@
+.root {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--layer-header);
+  /*
+   * The header is a layer, not a bar: empty space between its items stays
+   * transparent to pointer events so hero drag still works underneath.
+   */
+  pointer-events: none;
+}
+
+/* Raised above the menu panel so the toggle doubles as the close control. */
+.aboveMenu {
+  z-index: var(--layer-menu);
+}
+
+/*
+ * A barely-there scrim rather than a filled bar — enough separation to keep
+ * the controls legible over a bright pack shot.
+ */
+.root::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: calc(var(--header-height) * 1.9);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg-primary) 58%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/*
+ * The rule across the top.
+ *
+ * Its own element rather than a border on the header, because it insets from
+ * the viewport edges and carries a highlight — neither of which a border can
+ * do. Scaled from the left on entrance, which is why the transform origin
+ * matters here.
+ */
+.rule {
+  position: absolute;
+  inset-block-start: 1.15rem;
+  inset-inline: var(--page-gutter);
+  block-size: 1px;
+  background-color: var(--border-subtle);
+  transform-origin: left center;
+}
+
+/*
+ * The highlight at its left end. A short, very soft bloom sitting on the
+ * line — restrained on purpose: at any more than this it stops reading as
+ * light catching an edge and starts reading as a lens flare.
+ */
+.rule::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  inline-size: 9rem;
+  block-size: 3px;
+  translate: 0 -50%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--text-primary) 55%, transparent),
+    transparent
+  );
+  filter: blur(2px);
+}
+
+/*
+ * The row of controls. Full-bleed rather than inside a container, because
+ * the logo below is centred on the viewport and the two must not be measured
+ * against different boxes.
+ */
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-block-start: 2.4rem;
+  padding-inline: var(--page-gutter);
+  min-block-size: var(--header-height);
+}
+
+.bar > * {
+  pointer-events: auto;
+}
+
+/*
+ * Centred on the viewport, not on the space left over beside the controls.
+ *
+ * This is why the logo is taken out of flow: in a row with the menu and the
+ * CTA it would sit wherever the remaining width put it, which drifts as
+ * those labels change and is never the middle of the screen.
+ */
+.logo {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 2.4rem;
+  translate: -50% 0;
+}
+
+.logoLink {
+  display: inline-flex;
+}
+
+/*
+ * Below 768 the CTA leaves the header entirely rather than being squeezed —
+ * the menu panel carries it, so nothing is lost.
+ */
+.cta {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .cta {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .rule {
+    inset-block-start: 0.9rem;
+  }
+
+  .rule::after {
+    inline-size: 5rem;
+  }
+
+  .bar,
+  .logo {
+    padding-block-start: 1.9rem;
+  }
+
+  .logo {
+    padding-block-start: 0;
+    inset-block-start: 1.9rem;
+  }
+}

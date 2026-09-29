@@ -1,0 +1,97 @@
+/*
+ * No ring, no filled hit area — the header is a layer over the hero, and a
+ * bordered pill here would read as a second button competing with the CTA
+ * beside it. Padding carries the touch target instead.
+ */
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.25rem;
+  color: var(--text-secondary);
+  transition: color var(--duration-fast) var(--ease-out-soft);
+}
+
+.root:hover,
+.root:focus-visible {
+  color: var(--text-primary);
+}
+
+/*
+ * Four dots in a square. Drawn rather than imported: at 3px there is nothing
+ * an icon file would add, and this way they inherit `currentColor` and can
+ * move independently on hover.
+ */
+.dots {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 3px;
+}
+
+.dot {
+  inline-size: 3px;
+  block-size: 3px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+  transition:
+    transform var(--duration-base) var(--ease-out-expo),
+    opacity var(--duration-fast) var(--ease-out-soft);
+  opacity: 0.75;
+}
+
+.root:hover .dot,
+.root:focus-visible .dot {
+  opacity: 1;
+}
+
+/*
+ * Each dot drifts a fraction outward from the centre of the square, so the
+ * group opens very slightly rather than sliding as a block. Under a
+ * pixel and a half — it should register as the control waking up, not as an
+ * animation playing.
+ */
+.root:hover .dot:nth-child(1),
+.root:focus-visible .dot:nth-child(1) {
+  transform: translate(-1.2px, -1.2px);
+}
+
+.root:hover .dot:nth-child(2),
+.root:focus-visible .dot:nth-child(2) {
+  transform: translate(1.2px, -1.2px);
+}
+
+.root:hover .dot:nth-child(3),
+.root:focus-visible .dot:nth-child(3) {
+  transform: translate(-1.2px, 1.2px);
+}
+
+.root:hover .dot:nth-child(4),
+.root:focus-visible .dot:nth-child(4) {
+  transform: translate(1.2px, 1.2px);
+}
+
+/* Open: the square collapses towards a close mark. */
+.open .dot:nth-child(1),
+.open .dot:nth-child(4) {
+  transform: translate(0, 0) scale(1.15);
+}
+
+.open .dot:nth-child(2),
+.open .dot:nth-child(3) {
+  opacity: 0.25;
+}
+
+.label {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    transition-property: opacity;
+  }
+
+  .root:hover .dot,
+  .root:focus-visible .dot {
+    transform: none;
+  }
+}

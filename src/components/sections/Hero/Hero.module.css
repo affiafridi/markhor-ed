@@ -1,0 +1,173 @@
+.hero {
+  position: relative;
+  min-block-size: var(--hero-height);
+  display: grid;
+  /* Vertical gestures stay with the page; horizontal ones reach the drag. */
+  touch-action: pan-y;
+  cursor: grab;
+  /*
+   * The whole hero is a drag surface, so nothing in it is selectable. Without
+   * this, pulling the stage sideways sweeps a selection through the product
+   * name and tagline and leaves them highlighted.
+   */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hero[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+/*
+ * Over a product. Set from the stage's own hover test rather than from a
+ * DOM hit-box, because the products are in the canvas and the canvas takes
+ * no pointer events.
+ */
+.hero[data-over-product="true"]:not([data-dragging="true"]) {
+  cursor: pointer;
+}
+
+/* Detail is open: nothing here is draggable any more. */
+.hero[data-focused="true"] {
+  cursor: default;
+}
+
+/*
+ * Layer 0 — below the WebGL canvas, so the products physically overlap the
+ * statement. This only works because neither #site-content nor <main> creates
+ * a stacking context; see the note in globals.css.
+ */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--layer-background);
+  display: grid;
+  place-items: center;
+  /* The statement runs past the gutters by design; clip it so the page never
+     gains horizontal scroll, including at ultrawide. */
+  overflow: clip;
+  pointer-events: none;
+}
+
+/* Layer 20 — above the canvas. */
+.foreground {
+  position: relative;
+  z-index: var(--layer-content);
+  min-block-size: var(--hero-height);
+  display: grid;
+  /* Empty space passes gestures through to the hero's drag handler. */
+  pointer-events: none;
+}
+
+.frame {
+  position: relative;
+  block-size: 100%;
+  min-block-size: var(--hero-height);
+}
+
+.frame > * {
+  pointer-events: auto;
+}
+
+.indicator {
+  position: absolute;
+  inset-inline-start: var(--page-gutter);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+}
+
+.bottom {
+  position: absolute;
+  inset-inline: var(--page-gutter);
+  inset-block-end: calc(var(--space-lg) + var(--space-md));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/*
+ * The copy block the central transition crossfades. It grows upward from the
+ * baseline, so a longer product name never shifts the controls beside it.
+ */
+.copy {
+  flex: 0 1 auto;
+}
+
+/* Pull the controls out to the optical edge — the glyph has no ring, so its
+   padding would otherwise read as an indent. */
+.controls {
+  margin-inline-end: -0.75rem;
+}
+
+.hint {
+  position: absolute;
+  inset-inline-start: var(--page-gutter);
+  inset-block-end: var(--space-md);
+}
+
+/*
+ * The hover hint.
+ *
+ * Under the can rather than on it, and small enough to read as a caption on
+ * the product instead of a control attached to it. Driven by the data
+ * attribute the stage already publishes, so there is no second hit test and
+ * no JavaScript in the hover path at all.
+ */
+.explore {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 72%;
+  text-align: center;
+  color: var(--scene-accent);
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 6px;
+  transition:
+    opacity var(--duration-base) var(--ease-out-soft),
+    translate var(--duration-base) var(--ease-out-soft);
+}
+
+.hero[data-over-product="true"]:not([data-dragging="true"]):not([data-focused="true"])
+  .explore {
+  opacity: 0.85;
+  translate: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore {
+    translate: 0 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Tablet and below — the product list would crowd the stage, so the layout
+ * collapses to a single centred column while keeping every control.
+ * ------------------------------------------------------------------------ */
+@media (max-width: 1023px) {
+  .indicator {
+    display: none;
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: center;
+    inset-block-end: calc(var(--space-xl) + var(--space-sm));
+    gap: var(--space-sm);
+  }
+
+  .controls {
+    margin-inline-end: 0;
+  }
+
+  .hint {
+    inset-inline: 0;
+    text-align: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .bottom {
+    inset-block-end: calc(var(--space-xl) + var(--space-xs));
+  }
+}

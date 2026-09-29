@@ -1,0 +1,51 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-overlay);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-xl);
+  padding: calc(var(--header-height) + var(--space-lg)) var(--page-gutter) var(--space-xl);
+  background-color: color-mix(in srgb, var(--bg-primary) 96%, transparent);
+  backdrop-filter: blur(18px);
+  overflow-y: auto;
+}
+
+/*
+ * Closed is a state, not the end of an animation: the panel is `inert` and
+ * ignores pointer input the instant it closes, whatever the opacity tween is
+ * still doing. No `visibility` here — it would race the fade back in.
+ */
+.closed {
+  pointer-events: none;
+}
+
+.nav {
+  flex: 0 0 auto;
+}
+
+.list {
+  display: grid;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: inline-block;
+  color: var(--text-primary);
+  transition: color var(--duration-fast) var(--ease-out-soft);
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--scene-accent);
+}
+
+.footer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-md);
+}

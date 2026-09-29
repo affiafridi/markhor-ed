@@ -1,0 +1,111 @@
+import type { BrandEvent } from "@/types";
+
+/**
+ * Events and activations listed on markhordrinks.com.
+ *
+ * `date` is null throughout: the current site publishes these without dates.
+ * Capturing that gap here is deliberate — it is one of the things the CMS
+ * migration should fix.
+ */
+export const brandEvents: BrandEvent[] = [
+  {
+    id: "event-vibe-fest-chapter-one",
+    slug: "vibe-fest-chapter-one",
+    title: "VIBE FEST — Chapter One",
+    kind: "music",
+    location: "Peshawar",
+    date: null,
+    summary: "Live music and stage performances.",
+    gallery: [],
+  },
+  {
+    id: "event-bahria-beats-2025",
+    slug: "bahria-beats-2025",
+    title: "Bahria Beats 2025",
+    kind: "music",
+    location: "Karachi",
+    date: null,
+    summary: "Official energy partner.",
+    gallery: [],
+  },
+  {
+    id: "event-markhor-era-tmuc",
+    slug: "markhor-era-tmuc-peshawar",
+    title: "The Markhor Era at TMUC Peshawar",
+    kind: "music",
+    location: "Peshawar",
+    date: null,
+    summary: "Musical event sponsorship.",
+    gallery: [],
+  },
+  {
+    id: "event-kmu-futsal-badminton",
+    slug: "kmu-futsal-badminton-championship",
+    title: "KMU Futsal & Badminton Championship",
+    kind: "sports",
+    location: "Peshawar",
+    date: null,
+    summary: null,
+    gallery: [],
+  },
+  {
+    id: "event-peshawar-evolution-s2",
+    slug: "peshawar-evolution-championship-season-ii",
+    title: "Peshawar Evolution Championship Season II",
+    kind: "sports",
+    location: "Peshawar",
+    date: null,
+    summary: "Futsal championship.",
+    gallery: [],
+  },
+  {
+    id: "event-kala-khel-premier-league",
+    slug: "kala-khel-premier-league-2025",
+    title: "Kala Khel Premier League 2025",
+    kind: "sports",
+    location: null,
+    date: null,
+    summary: "Cricket league.",
+    gallery: [],
+  },
+  {
+    id: "event-usman-super-league",
+    slug: "usman-super-league",
+    title: "Usman Super League",
+    kind: "sports",
+    location: "Khyber Pakhtunkhwa",
+    date: null,
+    summary: null,
+    gallery: [],
+  },
+  {
+    id: "event-fylc-2025",
+    slug: "future-youth-leaders-conference-2025",
+    title: "Future Youth Leaders Conference 2025",
+    kind: "youth",
+    location: "Peshawar",
+    date: null,
+    summary: null,
+    gallery: [],
+  },
+  {
+    id: "event-shaukat-khanum-partnership",
+    slug: "shaukat-khanum-partnership",
+    title: "Shaukat Khanum Partnership",
+    kind: "social-impact",
+    location: null,
+    date: null,
+    summary: "Platinum sponsor.",
+    gallery: [],
+  },
+  {
+    id: "event-brt-peshawar-takeover",
+    slug: "brt-peshawar-takeover",
+    title: "BRT Peshawar Takeover",
+    kind: "activation",
+    location: "Peshawar",
+    date: null,
+    summary: "Citywide transit branding.",
+    gallery: [],
+  },
+];

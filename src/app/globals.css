@@ -1,26 +1,169 @@
 @import "tailwindcss";
+/*
+ * The reset must be layered. Unlayered rules beat every @layer, so an
+ * unlayered `* { margin: 0 }` would override `.container-* { margin-inline:
+ * auto }` in @layer components and stop every container centring.
+ */
+@import "../styles/reset.css" layer(base);
+@import "../styles/tokens.css";
+@import "../styles/typography.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Tailwind bridge.
+ *
+ * `inline` matters: it makes Tailwind emit `var(--scene-primary)` rather than
+ * baking in the resolved colour, so `bg-scene-primary` follows the active
+ * product theme when [data-scene] changes at runtime.
+ *
+ * tokens.css stays the source of truth; these are ergonomic aliases.
+ *   --bg-primary   -> bg-surface
+ *   --text-primary -> text-ink
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--bg-primary);
+  --color-surface-raised: var(--bg-secondary);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-dark: var(--surface-dark);
+
+  --color-ink: var(--text-primary);
+  --color-ink-soft: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+
+  --color-markhor-green: var(--markhor-green);
+  --color-markhor-green-dark: var(--markhor-green-dark);
+  --color-markhor-green-light: var(--markhor-green-light);
+  --color-markhor-green-glow: var(--markhor-green-glow);
+
+  --color-king-red: var(--king-red);
+  --color-king-red-dark: var(--king-red-dark);
+  --color-king-red-light: var(--king-red-light);
+  --color-king-red-glow: var(--king-red-glow);
+
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-soft: var(--accent-gold-soft);
+  --color-accent-orange: var(--accent-orange);
+
+  --color-scene-primary: var(--scene-primary);
+  --color-scene-accent: var(--scene-accent);
+  --color-scene-glow: var(--scene-glow);
+  --color-scene-deep: var(--scene-deep);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  --ease-out-expo: var(--ease-out-expo);
+  --ease-in-out-quart: var(--ease-in-out-quart);
+  --ease-out-soft: var(--ease-out-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-leading);
+  }
+
+  /*
+   * The persistent WebGL canvas is fixed behind the document, so the page
+   * itself must never paint an opaque background over it.
+   *
+   * Deliberately NO z-index here. The hero places its background typography
+   * *below* the canvas (layer 0) and its UI *above* it (layer 20) — which is
+   * only possible while this element and <main> stay out of the stacking
+   * order. Sections therefore opt in individually.
+   *
+   * Every section that must sit over the canvas needs a stacking context of
+   * its own: add `.layer-content`, or set `z-index: var(--layer-content)`.
+   * Without it a section renders behind the canvas.
+   */
+  #site-content {
+    position: relative;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Horizontal rhythm. Every section aligns to these, never to ad-hoc widths. */
+  .container-narrow,
+  .container-default,
+  .container-wide {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+  }
+  .container-narrow {
+    max-width: calc(var(--container-narrow) + var(--page-gutter) * 2);
+  }
+  .container-default {
+    max-width: calc(var(--container-default) + var(--page-gutter) * 2);
+  }
+  .container-wide {
+    max-width: calc(var(--container-wide) + var(--page-gutter) * 2);
+  }
+
+  /* Vertical rhythm. */
+  .section-block {
+    padding-block: var(--section-space);
+  }
+
+  /* Skip link — visible only once focused. */
+  .skip-link {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    z-index: var(--layer-menu);
+    padding: var(--space-2xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    background-color: var(--scene-primary);
+    color: var(--text-primary);
+    transform: translateY(-200%);
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .layer-background {
+    z-index: var(--layer-background);
+  }
+  .layer-webgl {
+    z-index: var(--layer-webgl);
+  }
+  .layer-content {
+    z-index: var(--layer-content);
+  }
+  .layer-header {
+    z-index: var(--layer-header);
+  }
+  .layer-overlay {
+    z-index: var(--layer-overlay);
+  }
+  .layer-menu {
+    z-index: var(--layer-menu);
+  }
+
+  /* Accessible-only text for labelling landmarks and controls. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
 }

@@ -1,0 +1,95 @@
+/*
+ * How far the charge has travelled, 0 at the base of the horn and 1 past the
+ * tip. Registered so the browser holds it as a real number: an unregistered
+ * custom property is a string, which the gradient below cannot do arithmetic
+ * on reliably, and which nothing can interpolate.
+ *
+ * Both ends of the range are deliberately off the horn, so a transition that
+ * is interrupted at either end leaves nothing stranded on screen.
+ */
+@property --horn-charge {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.root {
+  display: grid;
+  place-items: center;
+  /* No ring — padding alone carries the touch target. */
+  padding: 0.7rem;
+  color: var(--text-muted);
+  transition: color var(--duration-base) var(--ease-out-soft);
+}
+
+.root:hover,
+.root:focus-visible {
+  color: var(--scene-accent);
+}
+
+/*
+ * The brand's horn artwork, used as a mask so it inherits `currentColor`
+ * instead of being a flat image that cannot be tinted.
+ */
+.horn {
+  display: block;
+  /* Taller than wide, matching the artwork, so the horn fills its box. */
+  inline-size: 1.6rem;
+  block-size: 2.6rem;
+  background-color: currentColor;
+
+  /*
+   * The charge.
+   *
+   * A band of light travelling from the base of the horn to past its tip,
+   * painted over `currentColor` and cut to the horn by the same mask — so
+   * it is the horn that lights up, not a shape drawn on top of it.
+   *
+   * Four stops: a long soft tail, the accent, a near-white head, and a hard
+   * edge two percent above it. The sharp leading edge is what makes it read
+   * as something arriving rather than as a glow sliding about.
+   */
+  --horn-head: calc(var(--horn-charge) * 124% - 6%);
+
+  background-image: linear-gradient(
+    to top,
+    transparent calc(var(--horn-head) - 34%),
+    var(--scene-accent) calc(var(--horn-head) - 9%),
+    var(--lightning-core) var(--horn-head),
+    transparent calc(var(--horn-head) + 2%)
+  );
+
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/*
+ * Only a slight tip outward. The artwork already sweeps left and right; at a
+ * steeper angle the horn flattens and loses its shape entirely.
+ */
+.previous {
+  mask-image: url("/brand/symbols/markhor-horn-left.png");
+  -webkit-mask-image: url("/brand/symbols/markhor-horn-left.png");
+  transform: rotate(-12deg);
+}
+
+.next {
+  mask-image: url("/brand/symbols/markhor-horn-right.png");
+  -webkit-mask-image: url("/brand/symbols/markhor-horn-right.png");
+  transform: rotate(12deg);
+}
+
+@media (max-width: 767px) {
+  .root {
+    padding: 0.6rem;
+  }
+
+  .horn {
+    inline-size: 1.4rem;
+    block-size: 2.25rem;
+  }
+}

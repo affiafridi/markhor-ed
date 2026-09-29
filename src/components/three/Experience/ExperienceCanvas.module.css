@@ -1,0 +1,37 @@
+/*
+ * The canvas is fixed behind the whole document and never unmounts, so the
+ * same WebGL context and the same product textures persist across sections
+ * and across route changes.
+ */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-webgl);
+  /*
+   * The DOM above stays fully interactive, and the hero's drag works across
+   * the whole viewport rather than only where a DOM element happens to sit.
+   *
+   * The descendant rule is load-bearing: react-three-fiber sets
+   * `pointer-events: auto` inline on its own container, which overrides a
+   * `none` set only here — the canvas then swallows every pointer event.
+   */
+  pointer-events: none;
+  /* Light coming up on the product — step one of the hero entrance. */
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out-soft);
+}
+
+/*
+ * `!important` is load-bearing, not laziness: react-three-fiber writes
+ * `pointer-events: auto` as an inline style on its own container, and an
+ * inline declaration outranks any selector here. Without this the canvas
+ * swallows every pointer event and the hero's drag only works where a DOM
+ * element happens to sit above it.
+ */
+.root * {
+  pointer-events: none !important;
+}
+
+.ready {
+  opacity: 1;
+}

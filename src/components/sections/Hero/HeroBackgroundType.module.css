@@ -1,0 +1,73 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  /*
+   * Deliberately larger than the content container - the statement is meant
+   * to run past the gutters, and the hero clips it so it never adds page
+   * scroll. Sized so the longest line ("One Energy.") still lands inside the
+   * viewport: clipping a full stop in half reads as a bug, not as bleed.
+   */
+  font-family: var(--font-display);
+  font-style: var(--type-display-style);
+  /*
+   * Tuned so the longest line ("One Energy.") still lands inside the
+   * viewport: clipping a full stop in half reads as a bug, not as bleed.
+   */
+  font-size: clamp(3rem, 13.4vw, 14.5rem);
+  /*
+   * Tighter than it looks. The text is all caps, so the only thing that can
+   * collide is line one's baseline with line two's cap height — about 0.72em
+   * in this face — and everything above that is empty ascender space.
+   */
+  line-height: 0.8;
+  letter-spacing: -0.035em;
+  font-weight: var(--type-display-weight);
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+
+  /* Follows the active product; the token itself is interpolated by CSS. */
+  color: var(--scene-primary);
+
+  /*
+   * The statement is brighter at its ends than through the middle.
+   *
+   * The can stands in the centre of the line, and type at full strength
+   * behind it fights the product for the eye. Out at the ends there is
+   * nothing to compete with, so holding the whole line down to the level the
+   * centre needs just wastes it. Masking the centre gives the words their
+   * weight back where it costs nothing.
+   *
+   * `--statement-core` is a multiplier on `opacity`, so the centre lands
+   * where it always has and only the ends change.
+   */
+  --statement-edge: 0.74;
+  --statement-core: 0.62;
+
+  opacity: var(--statement-edge);
+  -webkit-mask-image: var(--statement-falloff);
+  mask-image: var(--statement-falloff);
+  --statement-falloff: linear-gradient(
+    to right,
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 1) 13%,
+    rgb(0 0 0 / var(--statement-core)) 35%,
+    rgb(0 0 0 / var(--statement-core)) 65%,
+    rgb(0 0 0 / 1) 87%,
+    rgb(0 0 0 / 1) 100%
+  );
+}
+
+.line {
+  display: block;
+}
+
+/* The statement sits second to the product, so it lightens as space tightens. */
+@media (max-width: 767px) {
+  .root {
+    --statement-edge: 0.64;
+    line-height: 0.86;
+  }
+}

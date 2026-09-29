@@ -1,0 +1,152 @@
+/*
+ * Markhor Drinks — typography system.
+ *
+ * Seven roles, each with its own size / leading / tracking / weight. Sections
+ * use the `.type-*` classes (or the tokens directly); they should not reach
+ * for ad-hoc Tailwind text sizes, so the scale stays consistent site-wide.
+ *
+ * FONT CHOICE IS NOT FINAL. The live site pairs Montserrat with a licensed
+ * display face ("VeniteAdoremus"). Until the brand team supplies the official
+ * files, both --font-display and --font-sans use Archivo; see the notes in
+ * src/app/fonts.ts for why one family covers both. To swap: drop the files
+ * into /public/fonts, register them with next/font in src/app/fonts.ts, and
+ * repoint the two variables below. Nothing else changes.
+ */
+
+:root {
+  --font-sans:
+    var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
+
+  /*
+   * Archivo is variable and ships a real italic, so every weight and slant
+   * the tokens ask for genuinely exists. Switching synthesis off makes that
+   * a guarantee rather than an assumption: if a future face is swapped in
+   * without a 900 or without an italic, the type will look wrong instead of
+   * quietly rendering a smeared fake, which is the failure that gets shipped.
+   */
+  font-synthesis: none;
+
+  /*
+   * Display roles.
+   *
+   * Heavy and slanted. The weight and the italic are the whole character
+   * here, so they are tokens like everything else rather than being written
+   * into the classes — a future brand face with a different idea about
+   * either is then a value change, not a rewrite.
+   *
+   * Title stays upright. At card size a slant stops reading as attitude and
+   * starts reading as emphasis, which is not what a title means.
+   */
+
+  /* Role: display — full-bleed editorial statements. */
+  --type-display-size: clamp(3.25rem, 10.5vw, 9.5rem);
+  --type-display-leading: 0.86;
+  --type-display-tracking: -0.03em;
+  --type-display-weight: 900;
+  --type-display-style: italic;
+
+  /* Role: headline — section openers. */
+  --type-headline-size: clamp(2.25rem, 5.6vw, 4.75rem);
+  --type-headline-leading: 0.9;
+  --type-headline-tracking: -0.028em;
+  --type-headline-weight: 900;
+  --type-headline-style: italic;
+
+  /* Role: title — card and block titles. */
+  --type-title-size: clamp(1.375rem, 2.4vw, 2rem);
+  --type-title-leading: 1.12;
+  --type-title-tracking: -0.015em;
+  --type-title-weight: 800;
+  --type-title-style: normal;
+
+  /* Role: body — long-form reading. */
+  --type-body-size: clamp(1rem, 0.35vw + 0.92rem, 1.1875rem);
+  --type-body-leading: 1.65;
+  --type-body-tracking: 0;
+  --type-body-weight: 400;
+
+  /* Role: label — compact technical captions, spec readouts. */
+  --type-label-size: 0.8125rem;
+  --type-label-leading: 1.3;
+  --type-label-tracking: 0.14em;
+  --type-label-weight: 500;
+
+  /* Role: micro — legal, footnotes, counters. */
+  --type-micro-size: 0.6875rem;
+  --type-micro-leading: 1.4;
+  --type-micro-tracking: 0.1em;
+  --type-micro-weight: 500;
+
+  /* Role: navigation. */
+  --type-nav-size: 0.9375rem;
+  --type-nav-leading: 1;
+  --type-nav-tracking: 0.02em;
+  --type-nav-weight: 500;
+}
+
+.type-display {
+  font-family: var(--font-display);
+  font-style: var(--type-display-style);
+  font-size: var(--type-display-size);
+  line-height: var(--type-display-leading);
+  letter-spacing: var(--type-display-tracking);
+  font-weight: var(--type-display-weight);
+  text-wrap: balance;
+}
+
+.type-headline {
+  font-family: var(--font-display);
+  font-style: var(--type-headline-style);
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-leading);
+  letter-spacing: var(--type-headline-tracking);
+  font-weight: var(--type-headline-weight);
+  text-wrap: balance;
+}
+
+.type-title {
+  font-family: var(--font-display);
+  font-style: var(--type-title-style);
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-leading);
+  letter-spacing: var(--type-title-tracking);
+  font-weight: var(--type-title-weight);
+  text-wrap: balance;
+}
+
+.type-body {
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  letter-spacing: var(--type-body-tracking);
+  font-weight: var(--type-body-weight);
+  text-wrap: pretty;
+}
+
+.type-label {
+  font-family: var(--font-sans);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
+  font-weight: var(--type-label-weight);
+  text-transform: uppercase;
+}
+
+.type-micro {
+  font-family: var(--font-mono);
+  font-size: var(--type-micro-size);
+  line-height: var(--type-micro-leading);
+  letter-spacing: var(--type-micro-tracking);
+  font-weight: var(--type-micro-weight);
+  text-transform: uppercase;
+}
+
+.type-nav {
+  font-family: var(--font-sans);
+  font-size: var(--type-nav-size);
+  line-height: var(--type-nav-leading);
+  letter-spacing: var(--type-nav-tracking);
+  font-weight: var(--type-nav-weight);
+}

@@ -1,0 +1,169 @@
+/*
+ * Sits above the WebGL layer, alongside the hero's own foreground. The
+ * product it describes is *behind* this, still in the canvas.
+ */
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: var(--layer-content);
+  display: grid;
+  align-content: center;
+  padding-inline: var(--page-gutter);
+  /* Empty space belongs to the stage underneath. */
+  pointer-events: none;
+  /* Hidden until the focus timeline animates it in; see Hero.tsx. */
+  opacity: 0;
+}
+
+.root > * {
+  pointer-events: auto;
+}
+
+/*
+ * Offset to one side rather than centred, so the copy and the product are
+ * not fighting for the middle of the frame.
+ */
+.copy {
+  /* Narrow enough to stay clear of the product's side of the frame. */
+  max-inline-size: 24rem;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2xs);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.name {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.tagline {
+  margin: 0;
+  color: var(--scene-accent);
+}
+
+.description {
+  margin-block-start: var(--space-xs);
+  color: var(--text-secondary);
+}
+
+.specs {
+  margin: var(--space-md) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.spec {
+  display: grid;
+  gap: var(--space-3xs);
+  /* A hairline rather than a card: the product is the object here. */
+  border-inline-start: 1px solid var(--border-subtle);
+  padding-inline-start: var(--space-xs);
+}
+
+.specLabel {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.specValue {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.specUnit {
+  margin-inline-start: 0.2em;
+  color: var(--text-muted);
+  font-size: 0.62em;
+}
+
+/*
+ * Centred at the foot of the frame, where a scroll cue belongs — not in the
+ * corner where a back button would sit.
+ */
+.back {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: var(--space-lg);
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2xs);
+  color: var(--text-muted);
+  transition: color var(--duration-base) var(--ease-out-soft);
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--scene-accent);
+}
+
+/* An upward chevron on a hairline, drifting up and fading as it goes. */
+.backGlyph {
+  inline-size: 1px;
+  block-size: 1.75rem;
+  background: linear-gradient(to bottom, currentColor, transparent);
+  position: relative;
+  animation: back-drift 2.6s var(--ease-out-soft) infinite;
+}
+
+.backGlyph::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 0.44rem;
+  block-size: 0.44rem;
+  border-block-start: 1px solid currentColor;
+  border-inline-start: 1px solid currentColor;
+  translate: -50% 0;
+  rotate: 45deg;
+}
+
+.backLabel {
+  color: inherit;
+}
+
+@keyframes back-drift {
+  0%,
+  100% {
+    transform: translateY(3px);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* The cue is a loop, so it is the first thing to go when motion is reduced. */
+@media (prefers-reduced-motion: reduce) {
+  .backGlyph {
+    animation: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .root {
+    align-content: end;
+    padding-block-end: calc(var(--space-3xl) + var(--space-lg));
+  }
+
+  .copy {
+    justify-items: center;
+    text-align: center;
+    max-inline-size: none;
+  }
+
+  .specs {
+    justify-content: center;
+  }
+
+  .back {
+    inset-block-end: var(--space-md);
+  }
+}

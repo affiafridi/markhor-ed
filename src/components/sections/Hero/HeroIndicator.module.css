@@ -1,0 +1,53 @@
+.root {
+  display: grid;
+  gap: var(--space-xs);
+  justify-items: start;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding-block: 0.25rem;
+  color: var(--text-muted);
+  text-align: left;
+  transition: color var(--duration-base) var(--ease-out-soft);
+}
+
+.entry:hover {
+  color: var(--text-secondary);
+}
+
+.index {
+  color: inherit;
+}
+
+/*
+ * One accent line, on the active entry only.
+ *
+ * It keeps its width at all times so the labels stay on a common left edge —
+ * it is the line that appears, not the layout that shifts. Inactive entries
+ * carry no decoration of their own.
+ */
+.rule {
+  display: block;
+  inline-size: 1.75rem;
+  block-size: 1px;
+  background-color: var(--scene-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--duration-scene) var(--ease-scene);
+}
+
+.label {
+  color: inherit;
+  white-space: nowrap;
+}
+
+.active {
+  color: var(--text-primary);
+}
+
+.active .rule {
+  transform: scaleX(1);
+}

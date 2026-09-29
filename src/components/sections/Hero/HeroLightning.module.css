@@ -1,0 +1,91 @@
+/*
+ * Sits inside the hero backdrop, above the statement but still below the
+ * WebGL layer, so the can occludes every arc that passes behind it.
+ *
+ * Sized and placed so that the centre of the viewBox always lands on the
+ * centre of the can, because that is where BOLT_ORIGIN sits. Two details
+ * carry that, and both are load-bearing:
+ *
+ * `inline-size: 100%` rather than `inset-inline: 0`. An <svg> with a viewBox
+ * is a replaced element: left and right insets do not stretch it. It sizes
+ * itself from its intrinsic ratio instead, and an over-constrained box then
+ * drops `right` and sits against the left edge — which put every discharge
+ * in a band well to the left of the product.
+ *
+ * `aspect-ratio` matching the viewBox. Anything else letterboxes (`meet`) or
+ * crops (`slice`) on one axis, by an amount that changes with the viewport,
+ * so the arcs would drift against the can as the window resized. Matching it
+ * makes the fit exact at every size, and the origin lands dead centre.
+ */
+.root {
+  position: absolute;
+  /* Centred on the can's horn and logo line. */
+  inset-block-start: 38%;
+  translate: 0 -50%;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  /*
+   * The reset clamps every <svg> to `max-width: 100%`. That is a separate
+   * property, so no amount of specificity lets a width override past it and
+   * the narrow-screen rule below would silently do nothing.
+   */
+  max-inline-size: none;
+  /* Mirrors BOLT_VIEWBOX in lib/hero/lightning.ts. Change them together. */
+  aspect-ratio: 1600 / 640;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/*
+ * The halo. Wide, soft and low-opacity; it is what makes the core read as
+ * hot rather than as a drawn line.
+ */
+.halo {
+  stroke: var(--scene-spark);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /*
+   * `stroke-opacity` rather than `opacity`: the timeline animates `opacity`
+   * to fire the bolt, and these multiply. It holds the gold back so the pale
+   * core stays the brightest thing in the arc.
+   */
+  stroke-opacity: 0.5;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+/*
+ * The core. Thin and near-white with a warm cast, matching the pale gold of
+ * the bolts printed on the can. Never the product's own green or red — a
+ * neon arc in the product colour reads as a game effect.
+ */
+.core {
+  stroke: var(--lightning-core);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+@media (max-width: 767px) {
+  /*
+   * The band takes its size from the width, so on a narrow screen it has to
+   * reach past the viewport for the arcs to stay in proportion with the can
+   * — otherwise the shortest ones strike entirely behind it. Still centred:
+   * -45% + 95% = 50%. The backdrop clips whatever runs off the sides.
+   */
+  .root {
+    inset-inline-start: -45%;
+    inline-size: 190%;
+  }
+
+  .halo {
+    stroke-width: 5;
+  }
+
+  .core {
+    stroke-width: 1.4;
+  }
+}

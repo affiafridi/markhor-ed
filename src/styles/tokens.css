@@ -1,0 +1,238 @@
+/*
+ * Markhor Drinks — design tokens.
+ *
+ * This file is the single source of truth for every colour, dimension and
+ * easing in the project. It is plain CSS custom properties on purpose: the
+ * tokens are readable by Tailwind (bridged in globals.css), by hand-written
+ * CSS, and by GSAP at runtime.
+ *
+ * Never write a raw hex value in a component. Add it here instead.
+ *
+ * Colours marked "observed" were sampled from the live markhordrinks.com
+ * Elementor colour kit. Colours marked "direction" follow the brief and are
+ * placeholders until the brand team supplies official values.
+ */
+
+:root {
+  /* ---------------------------------------------------------------------
+   * Brand — Markhor Green (observed: #0E492C is the live site's brand green)
+   * ------------------------------------------------------------------ */
+  --markhor-green: #0e492c;
+  --markhor-green-dark: #062415;
+  --markhor-green-light: #1d7a4a;
+  --markhor-green-glow: #2fd07f;
+
+  /* ---------------------------------------------------------------------
+   * Brand — Markhor King (direction: awaiting official brand values)
+   * ------------------------------------------------------------------ */
+  --king-red: #9b1120;
+  --king-red-dark: #450810;
+  --king-red-light: #d4202f;
+  --king-red-glow: #ff4d4d;
+
+  /* ---------------------------------------------------------------------
+   * Unannounced third product.
+   *
+   * The brand has published no identity for this SKU, so its palette is a
+   * deliberate neutral graphite. Do not replace these with invented brand
+   * colours — swap them only when the real identity is supplied.
+   * ------------------------------------------------------------------ */
+  --next-steel: #39434f;
+  --next-steel-dark: #0b0e11;
+  --next-steel-glow: #8ba0b6;
+
+  /* ---------------------------------------------------------------------
+   * Accents (observed: #F89223 is the live site's orange)
+   * ------------------------------------------------------------------ */
+  --accent-gold: #d9a441;
+  /*
+   * Electrical discharge. The core stays a pale warm white across every
+   * product — it is the light, not the brand colour. Only the surrounding
+   * spark shifts with the scene.
+   */
+  --lightning-core: #fff4dd;
+  --accent-gold-soft: #f0d9a4;
+  --accent-orange: #f89223;
+
+  /* ---------------------------------------------------------------------
+   * Neutral foundation — the site's global base is near-black, not green.
+   * Product colour arrives through the scene tokens below.
+   * ------------------------------------------------------------------ */
+  --bg-primary: #07090a;
+  --bg-secondary: #0d1011;
+  --bg-elevated: #14181a;
+
+  --text-primary: #f2f5f3;
+  --text-secondary: #a8b2ad;
+  --text-muted: #6b7671;
+
+  /* ---------------------------------------------------------------------
+   * UI surfaces
+   * ------------------------------------------------------------------ */
+  --border-subtle: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.22);
+  --surface-glass: rgb(255 255 255 / 0.05);
+  --surface-dark: rgb(0 0 0 / 0.55);
+  --focus-ring: var(--accent-gold);
+
+  /* ---------------------------------------------------------------------
+   * Layers — every stacking decision in the project refers to these.
+   * ------------------------------------------------------------------ */
+  --layer-background: 0;
+  --layer-webgl: 10;
+  --layer-content: 20;
+  --layer-header: 30;
+  --layer-overlay: 40;
+  --layer-menu: 50;
+
+  /* ---------------------------------------------------------------------
+   * Layout — fluid so sections stay aligned at every breakpoint.
+   * ------------------------------------------------------------------ */
+  --page-gutter: clamp(1.25rem, 4vw, 4rem);
+  --container-narrow: 48rem;
+  --container-default: 80rem;
+  --container-wide: 96rem;
+  --header-height: clamp(4rem, 5vw, 5.5rem);
+  --section-space: clamp(5rem, 12vh, 11rem);
+
+  /* ---------------------------------------------------------------------
+   * Spacing scale
+   * ------------------------------------------------------------------ */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --space-3xl: 9rem;
+
+  /* ---------------------------------------------------------------------
+   * Radii
+   * ------------------------------------------------------------------ */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 999rem;
+
+  /* ---------------------------------------------------------------------
+   * Motion — shared by GSAP (see lib/animation/gsap.ts) and CSS.
+   * ------------------------------------------------------------------ */
+  --duration-fast: 0.25s;
+  --duration-base: 0.6s;
+  --duration-slow: 1.2s;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/*
+ * Scene tokens.
+ *
+ * These are the only colour tokens a section should reach for when it needs
+ * to express "the current product". Registering them with @property makes
+ * them animatable — GSAP and CSS transitions can both interpolate a scene
+ * change rather than snapping between palettes.
+ */
+@property --scene-primary {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0e492c;
+}
+@property --scene-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d9a441;
+}
+@property --scene-glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2fd07f;
+}
+@property --scene-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #062415;
+}
+
+:root,
+[data-scene="base"] {
+  --scene-spark: var(--accent-gold);
+  --scene-primary: var(--markhor-green);
+  --scene-accent: var(--accent-gold);
+  --scene-glow: var(--markhor-green-glow);
+  --scene-deep: var(--markhor-green-dark);
+}
+
+[data-scene="green"] {
+  --scene-spark: var(--accent-gold);
+  --scene-primary: var(--markhor-green);
+  --scene-accent: var(--accent-orange);
+  --scene-glow: var(--markhor-green-glow);
+  --scene-deep: var(--markhor-green-dark);
+}
+
+[data-scene="king"] {
+  --scene-spark: var(--accent-gold-soft);
+  --scene-primary: var(--king-red);
+  --scene-accent: var(--accent-gold);
+  --scene-glow: var(--king-red-glow);
+  --scene-deep: var(--king-red-dark);
+}
+
+[data-scene="next"] {
+  --scene-spark: var(--next-steel-glow);
+  --scene-primary: var(--next-steel);
+  --scene-accent: var(--accent-gold);
+  --scene-glow: var(--next-steel-glow);
+  --scene-deep: var(--next-steel-dark);
+}
+
+/*
+ * Scene transition.
+ *
+ * Because the scene tokens are registered with @property as <color>, the
+ * browser interpolates them natively when [data-scene] changes — every
+ * element that reads them (background typography, UI accents, borders)
+ * transitions together, with no per-frame JavaScript.
+ *
+ * --duration-scene is mirrored by TRANSITION_DURATION in lib/hero/transition.ts
+ * and --ease-scene by TRANSITION_EASE, so the DOM and the 3D stage move on the
+ * same curve. Change them together.
+ */
+:root {
+  --duration-scene: 0.9s;
+  /* Quartic ease-out — the CSS twin of EASE.outQuart. */
+  --ease-scene: cubic-bezier(0.165, 0.84, 0.44, 1);
+
+  transition:
+    --scene-primary var(--duration-scene) var(--ease-scene),
+    --scene-accent var(--duration-scene) var(--ease-scene),
+    --scene-glow var(--duration-scene) var(--ease-scene),
+    --scene-deep var(--duration-scene) var(--ease-scene);
+}
+
+/*
+ * Under reduced motion the reset zeroes every transition on the page. The
+ * scene palette keeps a short one anyway: snapping between a green and a red
+ * environment reads as a glitch, where a brief crossfade reads as calm. The
+ * motion actually removed is the pinned scroll, the parallax and the drift.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    transition-duration: 0.4s !important;
+  }
+}
+
+/*
+ * Hero composition.
+ *
+ * The hero occupies one viewport; the pinned scroll sequence adds distance
+ * behind it without changing what is on screen.
+ */
+:root {
+  --hero-height: 100svh;
+  /* Scroll distance the product sequence consumes, per step. */
+  --hero-step-scroll: 80vh;
+}

@@ -1,0 +1,124 @@
+/*
+ * Minimal, opinionated normalisation. Deliberately small — this project
+ * styles almost everything explicitly, so a heavy reset would only add noise.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /*
+   * Lenis owns smooth scrolling. Native smooth-scroll is re-enabled only
+   * under reduced motion (see below), where Lenis is not mounted at all.
+   */
+  scroll-behavior: auto;
+
+  /*
+   * No native scrollbar. The hero pins for a fixed distance, so the bar
+   * appears, jumps and then vanishes again as the sequence releases — it
+   * reads as the page glitching rather than as a control. Scrolling itself
+   * is untouched, and the hero states the interaction in words.
+   */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  inline-size: 0;
+  block-size: 0;
+}
+
+body {
+  min-height: 100svh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  overflow-wrap: break-word;
+}
+
+/* Visible, on-brand focus for keyboard users only. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background-color: var(--scene-primary);
+  color: var(--text-primary);
+}
+
+/*
+ * Reduced motion. Content, layout and navigation are untouched — only the
+ * motion is removed. The JS side mirrors this (see hooks/useReducedMotion.ts):
+ * Lenis is not instantiated and GSAP timelines resolve to their end state.
+ *
+ * `[data-motion="full"]` is the one opt-out, set before first paint by the
+ * boot script in lib/motion-preference.ts. Written as `:not()` rather than as
+ * a separate override so that with JavaScript disabled — attribute absent —
+ * the preference is still honoured.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]),
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    /* Anchor navigation jumps instantly rather than animating. */
+    scroll-behavior: auto !important;
+  }
+}
