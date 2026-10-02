@@ -7,6 +7,7 @@ import {
   killFocusTransition,
   killProductTransition,
   nearestPositionFor,
+  refreshStoryScroll,
   releaseFocus,
   runFocusTransition,
   runProductTransition,
@@ -165,6 +166,11 @@ export function useHeroCarousel(): HeroCarousel {
         position: heroStage.position,
         immediate: prefersReducedMotion,
         attach,
+        // The pin reserves the story's distance instead of the carousel's
+        // now. Re-measured here, once the move has landed, rather than at
+        // the start of it: the length would otherwise change underneath a
+        // transition still in flight.
+        onComplete: refreshStoryScroll,
       });
     },
     [products, total, setFocusedProduct],
@@ -180,9 +186,22 @@ export function useHeroCarousel(): HeroCarousel {
     const { prefersReducedMotion, focusedProduct } = useExperienceStore.getState();
     if (!focusedProduct) return;
 
+    /*
+     * The story hands control back before the hero move starts.
+     *
+     * Its caller has already established that the story is at its beginning;
+     * this makes that a fact rather than an assumption, so the reverse
+     * cannot run with stage offsets still applied to the can.
+     */
+    heroStage.story = 0;
+
     releaseFocus({
       immediate: prefersReducedMotion,
-      onReturned: () => setFocusedProduct(null),
+      onReturned: () => {
+        setFocusedProduct(null);
+        // Back to the carousel's own, much shorter, pinned distance.
+        refreshStoryScroll();
+      },
     });
   }, [setFocusedProduct]);
 

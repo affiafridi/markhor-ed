@@ -1,7 +1,10 @@
 "use client";
 
-import type { RefObject } from "react";
+import { useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { gsap, registerGsap } from "@/lib/animation";
+import { heroStage, SCENE_COUNT, SCENE_DURATION } from "@/lib/hero";
 import { cn } from "@/lib/utils";
+import { useExperienceStore } from "@/store";
 import type { Product } from "@/types";
 import styles from "./HeroProductDetail.module.css";
 
@@ -14,23 +17,32 @@ interface HeroProductDetailProps {
 }
 
 /**
- * The product-detail copy, over the focused product.
+ * The product story: three content scenes beside a product that stays put.
  *
- * Deliberately only a layer of text and one control: the product itself is
- * still the same WebGL object that was standing in the hero a moment ago,
- * carried here by the focus transition. Nothing is re-rendered, re-mounted
- * or crossfaded, which is the whole reason the move reads as a camera
- * pushing in rather than as a second page arriving.
+ * Each scene is a whole composition. It arrives as one block and leaves as
+ * one block — no heading, stat or sentence has an animation of its own, and
+ * nothing's opacity is a function of scroll position. An earlier version did
+ * exactly that and the result read as a list of elements reacting to the
+ * wheel rather than as scenes you move between.
  *
- * It stays mounted through the exit so the copy can animate out; `inert`
- * keeps it off the keyboard path and out of the accessibility tree whenever
- * no product is open.
+ * So scroll does exactly one thing: it decides which scene is active. A
+ * change of active scene then fires one short tween. Nothing is dragged
+ * along with the scrollbar — the scenes all occupy the same box, so each one
+ * arrives where the last one was instead of at its own height. The can is
+ * not in that path at all: it sits in a fixed canvas holding the transform
+ * the entry move left it at, apart from one small offset per scene.
  *
- * Content comes from the catalogue and nothing else. `description` is null
- * for every product today because the brand has not supplied any, so the
- * specifications — which are printed on the can — carry the section. No copy
- * is written here to fill the space.
+ * The panel that is not active is `inert`: a scene that has slid out of the
+ * frame must not still be tabbable.
  */
+/**
+ * The rail lies down below 1024, where the copy is centred and a left-hand
+ * track would be stranded against the edge. The ticks have to know which way
+ * round it is to place themselves.
+ */
+const horizontal = () =>
+  typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches;
+
 export function HeroProductDetail({
   product,
   onClose,
@@ -39,6 +51,86 @@ export function HeroProductDetail({
 }: HeroProductDetailProps) {
   const open = product !== null;
   const specs = product?.specs.filter((spec) => spec.value !== null) ?? [];
+  const reducedMotion = useExperienceStore((state) => state.prefersReducedMotion);
+
+  const panels = useRef<Array<HTMLElement | null>>([]);
+  const railFill = useRef<HTMLSpanElement>(null);
+  const railTicks = useRef<Array<HTMLSpanElement | null>>([]);
+  const railCurrent = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    registerGsap();
+
+    let active = -1;
+
+    const show = (index: number) => {
+      if (index === active) return;
+      active = index;
+
+      railTicks.current.forEach((tick, i) => {
+        tick?.setAttribute("data-active", String(i === index));
+      });
+      if (railCurrent.current) {
+        railCurrent.current.textContent = String(index + 1).padStart(2, "0");
+      }
+
+      panels.current.forEach((panel, i) => {
+        if (!panel) return;
+        const isActive = i === index;
+        panel.inert = !isActive;
+
+        if (reducedMotion) {
+          gsap.set(panel, { opacity: isActive ? 1 : 0, y: 0 });
+          return;
+        }
+
+        // One tween for the whole scene, not one per element inside it.
+        gsap.to(panel, {
+          opacity: isActive ? 1 : 0,
+          y: isActive ? 0 : 30,
+          duration: SCENE_DURATION,
+          ease: "power3.out",
+          overwrite: true,
+        });
+      });
+    };
+
+    /*
+     * Read on the shared ticker rather than from a ScrollTrigger of its own.
+     * The pinned trigger already publishes progress, and a second trigger
+     * measuring the same scroll is how two systems end up disagreeing.
+     */
+    const tick = () => {
+      const story = heroStage.focus >= 1 ? heroStage.story : 0;
+
+      /*
+       * The rail is the one thing that does follow scroll continuously, and
+       * it should: it is a read-out of where you are, not part of the
+       * composition. Written as a transform so it costs nothing per frame.
+       */
+      const fill = railFill.current;
+      if (fill) fill.style.scale = horizontal() ? `${story} 1` : `1 ${story}`;
+
+      show(Math.min(SCENE_COUNT - 1, Math.floor(story * SCENE_COUNT * 0.999)));
+    };
+
+    gsap.ticker.add(tick);
+    return () => gsap.ticker.remove(tick);
+  }, [open, reducedMotion]);
+
+  const panel = (index: number, children: ReactNode) => (
+    <section
+      ref={(node) => {
+        panels.current[index] = node;
+      }}
+      className={styles.panel}
+      style={{ opacity: index === 0 ? 1 : 0 }}
+      inert={index !== 0}
+    >
+      <div className={styles.copy}>{children}</div>
+    </section>
+  );
 
   return (
     <div
@@ -48,34 +140,61 @@ export function HeroProductDetail({
       aria-hidden={!open}
       data-open={open}
     >
-      <div className={styles.copy}>
-        <p className={cn(styles.eyebrow, "type-label")}>{product?.name}</p>
-        {/*
-         * Headline, not display. The display role is sized to bleed across a
-         * whole viewport; here it shares the frame with a can that occupies
-         * the centre-right, and a title that runs underneath the product is
-         * not a composition.
-         */}
-        <h2 className={cn(styles.name, "type-headline")}>{product?.displayName}</h2>
-        <p className={cn(styles.tagline, "type-title")}>{product?.tagline}</p>
+      <div className={styles.column}>
+        {/* Scene one — identity. */}
+        {panel(
+          0,
+          <>
+            <p className={cn(styles.eyebrow, "type-label")}>{product?.name}</p>
+            <h2 className={cn(styles.name, "type-headline")}>{product?.displayName}</h2>
+            <p className={cn(styles.tagline, "type-title")}>{product?.tagline}</p>
 
-        {product?.description ? (
-          <p className={cn(styles.description, "type-body")}>{product.description}</p>
-        ) : null}
+            {specs.length > 0 ? (
+              <dl className={styles.specs}>
+                {specs.map((spec) => (
+                  <div className={styles.spec} key={spec.label}>
+                    <dt className={cn(styles.specLabel, "type-micro")}>{spec.label}</dt>
+                    <dd className={cn(styles.specValue, "type-title")}>
+                      {spec.value}
+                      <span className={styles.specUnit}>{spec.unit}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </>,
+        )}
 
-        {specs.length > 0 ? (
-          <dl className={styles.specs}>
-            {specs.map((spec) => (
-              <div className={styles.spec} key={spec.label}>
-                <dt className={cn(styles.specLabel, "type-micro")}>{spec.label}</dt>
-                <dd className={cn(styles.specValue, "type-title")}>
-                  {spec.value}
-                  <span className={styles.specUnit}>{spec.unit}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
+        {/* Scene two — the drink.
+            Only what the packaging itself states. The brand has supplied no
+            body copy, and the gap is marked rather than filled. */}
+        {panel(
+          1,
+          <>
+            <p className={cn(styles.eyebrow, "type-label")}>The drink</p>
+            <h2 className={cn(styles.name, "type-headline")}>Stimulant Drink</h2>
+            {product?.description ? (
+              <p className={cn(styles.body, "type-body")}>{product.description}</p>
+            ) : (
+              <p className={cn(styles.pending, "type-micro")}>
+                Product copy to be supplied by the brand.
+              </p>
+            )}
+          </>,
+        )}
+
+        {/* Scene three — origin. Printed round the foot of the can, along
+            with the skyline the story raises the product to show. */}
+        {panel(
+          2,
+          <>
+            <p className={cn(styles.eyebrow, "type-label")}>Origin</p>
+            <h2 className={cn(styles.name, "type-headline")}>Proud Pakistani Brand</h2>
+            <p className={cn(styles.pending, "type-micro")}>
+              Brand story to be supplied.
+            </p>
+          </>,
+        )}
       </div>
 
       {/*
@@ -89,6 +208,32 @@ export function HeroProductDetail({
        * Still a real button underneath: pointing at a gesture is no help to
        * anyone using a keyboard or a screen reader.
        */}
+      {/* Progress through the scenes. See the note in the stylesheet. */}
+      <div className={styles.rail} aria-hidden="true">
+        <span ref={railFill} className={styles.railFill} />
+        {Array.from({ length: SCENE_COUNT }, (_, index) => (
+          <span
+            key={index}
+            ref={(node) => {
+              railTicks.current[index] = node;
+            }}
+            className={styles.railTick}
+            data-active={index === 0}
+            style={
+              horizontal()
+                ? { insetInlineStart: `${(index / (SCENE_COUNT - 1)) * 100}%` }
+                : { insetBlockStart: `${(index / (SCENE_COUNT - 1)) * 100}%` }
+            }
+          />
+        ))}
+        <span className={cn(styles.railCount, "type-micro")}>
+          <span ref={railCurrent} className={styles.railCurrent}>
+            01
+          </span>
+          {` / ${String(SCENE_COUNT).padStart(2, "0")}`}
+        </span>
+      </div>
+
       <button
         type="button"
         className={styles.back}

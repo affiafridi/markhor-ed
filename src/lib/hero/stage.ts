@@ -76,6 +76,14 @@ export interface HeroStageState {
   detailScale: number;
   detailTilt: number;
 
+  /**
+   * Progress through the pinned product story, 0 to 1.
+   *
+   * Moves the column of content scenes and nothing else. It is deliberately
+   * *not* wired to the can at all — see the note at the top of focus.ts.
+   */
+  story: number;
+
   /** Index of the product under the cursor, or -1. Published by the stage. */
   hoverIndex: number;
   /** Depth of that claim, so the nearest product wins an overlap. */
@@ -93,6 +101,7 @@ export const heroStage: HeroStageState = {
   focus: 0,
   focusIndex: -1,
   exitSigns: [],
+  story: 0,
   detailX: 0,
   detailY: 0,
   detailScale: 1,
@@ -109,6 +118,7 @@ export function resetHeroStage(): void {
   heroStage.isDragging = false;
   heroStage.hasPointer = false;
   heroStage.focus = 0;
+  heroStage.story = 0;
   heroStage.focusIndex = -1;
   heroStage.exitSigns = [];
   heroStage.hoverIndex = -1;

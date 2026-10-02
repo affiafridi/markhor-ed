@@ -13,6 +13,7 @@ import {
   nextChargeDelay,
   planCharge,
   secondaryDelay,
+  SCENE_COUNT,
 } from "@/lib/hero";
 import { CAMERA } from "@/lib/three";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,24 @@ const PRODUCT_HEIGHT = 1.58;
 const DETAIL_Z = 0.55;
 /** Only once the can has genuinely stopped moving. */
 const SETTLED = 0.995;
+/**
+ * How far into the energy stage before anything fires.
+ *
+ * The electricity is the last beat of the story, not decoration on the whole
+ * detail scene. Nothing crackles while the reader is still on the facts.
+ */
+const ENERGY_THRESHOLD = 0.12;
+
+/**
+ * How far into the last scene the reader is, 0 to 1.
+ *
+ * The electricity belongs to the final scene, not to the whole detail view —
+ * nothing crackles while the reader is still on the product's facts.
+ */
+const energyProgress = () => {
+  const last = (SCENE_COUNT - 1) / SCENE_COUNT;
+  return Math.max(0, Math.min(1, (heroStage.story - last) * SCENE_COUNT));
+};
 
 interface Bolt {
   core: SVGPathElement | null;
@@ -71,9 +90,10 @@ export function HeroProductCharge({ className }: { className?: string }) {
       const node = wrapper.current;
       if (!node) return;
 
-      const settled = heroStage.focus >= SETTLED;
-      node.style.opacity = settled ? "1" : "0";
-      if (!settled) return;
+      const live = heroStage.focus >= SETTLED ? energyProgress() : 0;
+      // Fades up with the stage rather than switching on.
+      node.style.opacity = String(Math.min(1, live * 2.5));
+      if (live <= 0) return;
 
       const halfHeight =
         Math.tan((CAMERA.fov * Math.PI) / 360) * (CAMERA_DISTANCE[tier] - DETAIL_Z);
@@ -146,8 +166,9 @@ export function HeroProductCharge({ className }: { className?: string }) {
     const schedule = () => {
       timer = window.setTimeout(() => {
         if (cancelled) return;
-        // Silent unless the can is actually sitting still in detail.
-        if (heroStage.focus >= SETTLED) {
+        // Silent unless the can is still *and* the story has reached its
+        // last scene.
+        if (heroStage.focus >= SETTLED && energyProgress() > ENERGY_THRESHOLD) {
           fire(1);
           const delay = secondaryDelay();
           if (delay !== null) {

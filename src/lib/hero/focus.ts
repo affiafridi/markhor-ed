@@ -92,6 +92,27 @@ const windowed = (focus: number, [start, end]: FocusWindow) =>
  */
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+/* ---------------------------------------------------------------------------
+ * The product story.
+ *
+ * Three content scenes beside a can that does not move.
+ *
+ * Note what is absent: there is no path from scroll to the product's
+ * transform, not even a small one. Two earlier versions had one - first
+ * scrubbed, then a settled offset per scene - and both read as the can
+ * reacting to the wheel. It is a product shot; it should sit there. The
+ * scenes move, the can is the constant they move against.
+ *
+ * SCENE_DURATION stays because the copy still transitions. Nothing here
+ * takes a scroll value.
+ * ------------------------------------------------------------------------ */
+
+/** How many scenes the story has. */
+export const SCENE_COUNT = 3;
+
+/** Seconds one scene takes to replace another. */
+export const SCENE_DURATION = 0.6;
+
 export interface FocusParams {
   /** 0 to 1, linear. */
   focus: number;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { isFocusTransitioning } from "@/lib/hero";
+import { heroStage, isFocusTransitioning } from "@/lib/hero";
 
 /**
  * Accumulated upward intent needed to leave, in wheel-pixels.
@@ -53,8 +53,23 @@ export function useDetailReturn({
       onReturn();
     };
 
+    /*
+     * The hero is only reachable from the start of the story.
+     *
+     * Scrolling up inside the story rewinds it, because the pinned trigger
+     * is scrubbed; only once it is back at its beginning does further
+     * upward intent mean "leave the product". Without this the two would
+     * compete and a scroll up from the middle of the story would throw the
+     * user out of a sequence they were still reading.
+     */
+    const atStoryStart = () => heroStage.story <= 0.001;
+
     const onWheel = (event: WheelEvent) => {
       if (done || isFocusTransitioning()) return;
+      if (!atStoryStart()) {
+        intent = 0;
+        return;
+      }
 
       const now = performance.now();
       intent = Math.max(0, intent - ((now - last) / 1000) * DECAY_PER_SECOND);
@@ -76,6 +91,7 @@ export function useDetailReturn({
 
     const onTouchMove = (event: TouchEvent) => {
       if (done || touchY === null || isFocusTransitioning()) return;
+      if (!atStoryStart()) return;
       const y = event.touches[0]?.clientY;
       if (y === undefined) return;
       // Dragging down the screen is the touch equivalent of scrolling up.

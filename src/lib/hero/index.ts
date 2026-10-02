@@ -8,7 +8,14 @@ export {
   PARALLAX_STRENGTH,
 } from "./layout";
 export { heroStage, resetHeroStage } from "./stage";
-export { applyFocus, planExit, themePosition, FOCUS_DURATION } from "./focus";
+export {
+  applyFocus,
+  planExit,
+  themePosition,
+  FOCUS_DURATION,
+  SCENE_COUNT,
+  SCENE_DURATION,
+} from "./focus";
 export type { FocusParams, FocusedTransform } from "./focus";
 export type { HeroStageState } from "./stage";
 export {
@@ -53,5 +60,6 @@ export {
 } from "./charge";
 export type { ChargeEdge } from "./charge";
 export { registerScrollSync, syncScrollToIndex } from "./scroll-sync";
+export { registerStoryRefresh, refreshStoryScroll } from "./story-sync";
 export { resolveTheme, mixLiveTheme, liveTheme } from "./theme";
 export type { ThemeColors } from "./theme";

@@ -111,14 +111,19 @@
 }
 
 /*
- * Below 768 the CTA leaves the header entirely rather than being squeezed —
- * the menu panel carries it, so nothing is lost.
+ * The CTA leaves the header entirely rather than being squeezed — the menu
+ * panel carries it, so nothing is lost.
+ *
+ * The threshold is 1024, not 768. The logo is centred on the *viewport*, so
+ * it does not yield space as things get tighter: the right-hand controls
+ * have only half the width to live in, and at 800 the CTA ran straight into
+ * the menu.
  */
 .cta {
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .cta {
     display: inline-flex;
   }

@@ -1,21 +1,51 @@
 /*
  * Sits above the WebGL layer, alongside the hero's own foreground. The
- * product it describes is *behind* this, still in the canvas.
+ * product it describes is *behind* this, still in the canvas — which is
+ * fixed to the viewport, so it stays put on its own while this column moves.
  */
 .root {
   position: absolute;
   inset: 0;
   z-index: var(--layer-content);
-  display: grid;
-  align-content: center;
-  padding-inline: var(--page-gutter);
+  /* The column runs past the viewport; the hero must not gain scroll. */
+  overflow: clip;
   /* Empty space belongs to the stage underneath. */
   pointer-events: none;
   /* Hidden until the focus timeline animates it in; see Hero.tsx. */
   opacity: 0;
 }
 
-.root > * {
+/*
+ * The scenes, stacked in one place.
+ *
+ * Every panel occupies the same box, so scene two lands exactly where scene
+ * one was. They used to sit in a column that slid with the scroll, which
+ * meant each scene's centre arrived at a different height and the copy
+ * appeared to jump around between them.
+ *
+ * Scroll still moves through the scenes - it just chooses which one is
+ * showing rather than dragging a column past the window.
+ */
+.column {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * Inset unevenly on purpose: more off the top than the bottom, which puts
+ * the block a little below the middle of the frame. Level with the centre it
+ * competed with the widest part of the can; here it sits under it.
+ */
+.panel {
+  position: absolute;
+  inset: 16svh var(--page-gutter) 6svh;
+  display: grid;
+  align-content: center;
+  /* Only the active scene is reachable; the rest are set inert. */
+  pointer-events: none;
+}
+
+.panel > * {
   pointer-events: auto;
 }
 
@@ -46,7 +76,7 @@
   color: var(--scene-accent);
 }
 
-.description {
+.body {
   margin-block-start: var(--space-xs);
   color: var(--text-secondary);
 }
@@ -83,6 +113,133 @@
 }
 
 /*
+ * Awaiting copy.
+ *
+ * Marked as a gap rather than filled with writing — the brand has supplied
+ * no body copy for this product, and inventing some would put claims on a
+ * drink that nobody approved.
+ */
+.pending {
+  margin: var(--space-sm) 0 0;
+  padding-inline-start: var(--space-xs);
+  border-inline-start: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  max-inline-size: 22rem;
+}
+
+/* Scene three. Read off the foot of the can, where it is printed. */
+.origin {
+  margin: 0;
+  color: var(--scene-accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * The scroll rail.
+ *
+ * A thin vertical track down the left edge with a mark for each scene and a
+ * line that fills as you move through them. It exists because the scenes
+ * replace each other in place: nothing slides past, so without this the page
+ * gives no sign that scrolling is doing anything at all until a scene
+ * changes.
+ *
+ * It sits outside the panels so it does not fade with them - it is the one
+ * element that has to stay put while everything else swaps.
+ * ------------------------------------------------------------------------ */
+.rail {
+  position: absolute;
+  inset-inline-start: var(--page-gutter);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  block-size: 9rem;
+  inline-size: 1px;
+  background-color: var(--border-subtle);
+  pointer-events: none;
+}
+
+/*
+ * The filled portion. Scaled rather than resized, so the whole indicator is
+ * a transform and costs no layout on a value that changes every frame.
+ */
+.railFill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--scene-accent);
+  transform-origin: top center;
+  scale: 1 0;
+}
+
+.railTick {
+  position: absolute;
+  inset-inline-start: 50%;
+  inline-size: 3px;
+  block-size: 3px;
+  border-radius: var(--radius-full);
+  background-color: var(--border-strong);
+  translate: -50% -50%;
+  transition:
+    background-color var(--duration-base) var(--ease-out-soft),
+    scale var(--duration-base) var(--ease-out-expo);
+}
+
+.railTick[data-active="true"] {
+  background-color: var(--scene-accent);
+  scale: 1.9;
+}
+
+/* The scene count, set against the top of the rail. */
+.railCount {
+  position: absolute;
+  inset-inline-start: calc(100% + 0.75rem);
+  inset-block-start: -0.35rem;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.railCurrent {
+  color: var(--text-primary);
+}
+
+/*
+ * The rail needs room of its own, so the copy steps in from the gutter
+ * rather than sitting on top of it.
+ */
+@media (min-width: 1024px) {
+  .panel {
+    padding-inline-start: 3.25rem;
+  }
+}
+
+/*
+ * Narrow screens centre the copy, so a left rail would be stranded against
+ * the edge. It lies down under the copy instead.
+ */
+@media (max-width: 1023px) {
+  .rail {
+    inset-inline: var(--page-gutter);
+    inset-block-start: auto;
+    inset-block-end: 7.5rem;
+    translate: 0;
+    inline-size: auto;
+    block-size: 1px;
+  }
+
+  .railFill {
+    transform-origin: left center;
+    scale: 0 1;
+  }
+
+  .railTick {
+    inset-block-start: 50%;
+    inset-inline-start: auto;
+  }
+
+  .railCount {
+    inset-inline-start: 0;
+    inset-block-start: calc(100% + 0.6rem);
+  }
+}
+
+/*
  * Centred at the foot of the frame, where a scroll cue belongs — not in the
  * corner where a back button would sit.
  */
@@ -95,6 +252,7 @@
   gap: var(--space-2xs);
   color: var(--text-muted);
   transition: color var(--duration-base) var(--ease-out-soft);
+  pointer-events: auto;
 }
 
 .back:hover,
@@ -148,11 +306,6 @@
 }
 
 @media (max-width: 1023px) {
-  .root {
-    align-content: end;
-    padding-block-end: calc(var(--space-3xl) + var(--space-lg));
-  }
-
   .copy {
     justify-items: center;
     text-align: center;
@@ -161,6 +314,12 @@
 
   .specs {
     justify-content: center;
+  }
+
+  .pending {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+    margin-inline: auto;
   }
 
   .back {
